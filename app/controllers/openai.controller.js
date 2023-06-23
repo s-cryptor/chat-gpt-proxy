@@ -15,12 +15,12 @@ class OpenaiController {
     return OpenaiController.instance
   }
 
-  async sendMessage(req, res) {
+  async sendMessage(req, io) {
     try {
       const res = await openai.createChatCompletion(
         {
           model: 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: req.body.text }],
+          messages: [{ role: 'user', content: req }],
           stream: true,
         },
         { responseType: 'stream' }
@@ -39,6 +39,7 @@ class OpenaiController {
           try {
             const parsed = JSON.parse(message)
             console.log(parsed.choices[0].delta.content)
+            io.emit('answer', parsed.choices[0].delta.content)
           } catch (error) {
             console.error('Could not JSON parse stream message', message, error)
           }
